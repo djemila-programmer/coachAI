@@ -38,9 +38,13 @@ app.use('/api/progress', progressRoutes);
 
 app.use(errorHandler);
 
+const PORT = process.env.PORT || 10000;
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connecté'))
   .catch(err => console.error('❌ MongoDB erreur', err));
 
-export default app;   // ✅ IMPORTANT POUR VERCEL
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+});
