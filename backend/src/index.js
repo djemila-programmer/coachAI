@@ -25,6 +25,11 @@ app.use(cors({
 
 app.use(express.json());
 
+// ✅ ROUTE RACINE (très importante pour Render)
+app.get('/', (req, res) => {
+  res.send("🚀 API LanguageCoach fonctionne !");
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Backend is running' });
 });
@@ -40,11 +45,13 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 10000;
 
+// Connexion MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connecté'))
   .catch(err => console.error('❌ MongoDB erreur', err));
 
+// Démarrage serveur (OBLIGATOIRE pour Render)
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Serveur démarré sur le port ${PORT}`);
 });
