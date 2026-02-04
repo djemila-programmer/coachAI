@@ -6,7 +6,6 @@ import {
   Pencil,
   Target,
   Menu,
-  Plus,
   Copy,
   RefreshCw,
   ThumbsUp,
@@ -34,7 +33,7 @@ const modes: Record<Mode, { title: string; icon: any }> = {
 
 export default function Chat() {
   const navigate = useNavigate();
-  const { isAuthenticated, settings } = useUser();
+  const { settings } = useUser();
 
   const {
     conversations,
@@ -51,8 +50,6 @@ export default function Chat() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // 🔥 États pour Copier / Like
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [likedMessages, setLikedMessages] = useState<Set<string>>(new Set());
 
@@ -62,12 +59,11 @@ export default function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeMessages.length, isLoading]);
 
-  // 🔥 Sélection automatique du dernier chat au reload
   useEffect(() => {
     if (!activeConversationId && conversations.length > 0) {
       setActiveConversationId(conversations[0].id);
     }
-  }, [conversations]);
+  }, [conversations, activeConversationId, setActiveConversationId]);
 
   const handleCreateConversation = (mode: Mode) => {
     const conv = createConversation('Nouvelle conversation', false, mode);
@@ -82,15 +78,9 @@ export default function Chat() {
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
     if (!content.trim()) return;
 
     const convId = ensureConversation();
-
     addMessage(convId, 'user', content);
     setIsLoading(true);
 
@@ -101,8 +91,8 @@ export default function Chat() {
         level: settings.userLevel,
       });
 
-      const aiReply = response.reply || "Désolé, je n’ai pas compris.";
-  addMessage(convId, 'assistant', aiReply);
+      const aiReply = response.reply || "Désolé, je n'ai pas compris.";
+      addMessage(convId, 'assistant', aiReply);
     } catch (err) {
       console.error('Erreur IA:', err);
       addMessage(
@@ -132,7 +122,6 @@ export default function Chat() {
   return (
     <AppLayout>
       <div className="flex h-screen bg-muted/20">
-        {/* ===== SIDEBAR ===== */}
         <aside
           className={cn(
             'fixed inset-y-0 left-0 z-50 w-80 bg-background border-r transform transition-transform duration-300',
@@ -161,7 +150,6 @@ export default function Chat() {
           />
         )}
 
-        {/* ===== MAIN CONTENT ===== */}
         <div
           className={cn(
             'flex-1 flex flex-col transition-all duration-300',
@@ -169,7 +157,6 @@ export default function Chat() {
             isSidebarOpen ? 'ml-80' : 'ml-0'
           )}
         >
-          {/* HEADER */}
           <header className="flex items-center justify-between gap-4 px-4 py-3 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10">
             <div className="flex items-center gap-3 min-w-0">
               <button
@@ -188,18 +175,16 @@ export default function Chat() {
                 </h1>
                 <p className="text-xs text-muted-foreground truncate">
                   {activeConversation?.description ||
-                    'Posez vos questions ou commencez à discuter avec l’IA.'}
+                    'Posez vos questions ou commencez à discuter avec l\'IA.'}
                 </p>
               </div>
             </div>
           </header>
 
-          {/* ===== MESSAGES ===== */}
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-3xl mx-auto w-full px-4 py-6 space-y-6">
               {activeMessages.map((m) => (
                 <div key={m.id} className="flex gap-3">
-                  {/* Avatar */}
                   <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                     {m.role === 'user' ? (
                       <User className="w-5 h-5" />
@@ -215,7 +200,6 @@ export default function Chat() {
                       timestamp={new Date(m.timestamp)}
                     />
 
-                    {/* 🔥 ACTIONS (UNE SEULE LIGNE) */}
                     {m.role === 'assistant' && (
                       <div className="flex gap-4 text-muted-foreground text-sm">
                         <button
@@ -227,7 +211,7 @@ export default function Chat() {
                           className="hover:text-foreground flex items-center gap-1"
                         >
                           <Copy className="w-4 h-4" />
-                          {copiedId === m.id ? "Copié !" : "Copier"}
+                          {copiedId === m.id ? 'Copié !' : 'Copier'}
                         </button>
 
                         <button
@@ -239,10 +223,13 @@ export default function Chat() {
 
                         <button
                           onClick={() => {
-                            setLikedMessages(prev => {
+                            setLikedMessages((prev) => {
                               const newSet = new Set(prev);
-                              if (newSet.has(m.id)) newSet.delete(m.id);
-                              else newSet.add(m.id);
+                              if (newSet.has(m.id)) {
+                                newSet.delete(m.id);
+                              } else {
+                                newSet.add(m.id);
+                              }
                               return newSet;
                             });
                           }}
@@ -250,11 +237,11 @@ export default function Chat() {
                         >
                           <ThumbsUp
                             className={cn(
-                              "w-4 h-4",
-                              likedMessages.has(m.id) && "text-primary"
+                              'w-4 h-4',
+                              likedMessages.has(m.id) && 'text-primary'
                             )}
                           />
-                          {likedMessages.has(m.id) ? "Aimé" : "Like"}
+                          {likedMessages.has(m.id) ? 'Aimé' : 'Like'}
                         </button>
                       </div>
                     )}
@@ -262,7 +249,6 @@ export default function Chat() {
                 </div>
               ))}
 
-              {/* INDICATEUR TYPING */}
               {isLoading && (
                 <ChatBubble
                   role="assistant"
@@ -276,13 +262,9 @@ export default function Chat() {
             </div>
           </div>
 
-          {/* ===== INPUT ===== */}
           <div className="border-t bg-background">
             <div className="max-w-3xl mx-auto w-full p-3">
-              <ChatInput
-                onSend={handleSendMessage}
-                isLoading={isLoading}
-              />
+              <ChatInput onSend={handleSendMessage} isLoading={isLoading} />
             </div>
           </div>
         </div>
