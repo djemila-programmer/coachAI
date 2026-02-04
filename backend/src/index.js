@@ -17,7 +17,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:5173","http://localhost:8080", "http://localhost:8081","https://languagecoach-rfjy.onrender.com","hhttps://coach-ai-rwet.vercel.app/" ],
+  origin: ["http://localhost:5173","http://localhost:8080", "http://localhost:8081","https://languagecoach-rfjy.onrender.com","https://coach-ai-rwet-alff8lycl-bonkoungoutoussiane-8106s-projects.vercel.app" ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
