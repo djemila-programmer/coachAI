@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Languages, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -42,79 +42,11 @@ const goals = [
   { id: 'culture', name: 'Culture', icon: '📚', description: 'Littérature et cinéma' },
 ];
 
-// === LOGIN MODAL ===
-function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const { login, loginWithGoogle } = useUser();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    try {
-      await login(email, password);
-      onClose();
-    } catch (err: any) {
-      setError(err.message || 'Échec de la connexion');
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    try {
-      await loginWithGoogle();
-      onClose();
-    } catch (err: any) {
-      setError(err.message || 'Échec de la connexion Google');
-    }
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-lg">
-        <h2 className="text-xl font-semibold mb-4 text-center">Connectez-vous pour continuer</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Mot de passe"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button type="submit" className="bg-blue-500 text-white rounded-lg py-2 mt-2">
-            Connexion
-          </Button>
-        </form>
-        <Button
-          onClick={handleGoogleLogin}
-          className="bg-red-500 text-white rounded-lg py-2 mt-2 w-full"
-        >
-          Continuer avec Google
-        </Button>
-        <Button variant="outline" onClick={onClose} className="mt-2 w-full">
-          Annuler
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 // === LANDING ===
 export default function Landing() {
   const navigate = useNavigate();
-  const { settings, updateSettings, token } = useUser();
+  const { updateSettings } = useUser();
   const [step, setStep] = useState(0);
-  const [loginOpen, setLoginOpen] = useState(false);
 
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('');
@@ -122,16 +54,8 @@ export default function Landing() {
   const [otherGoal, setOtherGoal] = useState('');
   const [showOtherInput, setShowOtherInput] = useState(false);
 
-  useEffect(() => {
-    if (!token && step > 0) setLoginOpen(true);
-  }, [token, step]);
-
   const handleStart = () => {
-    if (!token) {
-      setLoginOpen(true);
-    } else {
-      setStep(1);
-    }
+    setStep(1);
   };
 
   const toggleGoal = (goalId: string) => {
@@ -165,56 +89,53 @@ export default function Landing() {
   // === PAGE AVANT COMMENCER ===
   if (step === 0) {
     return (
-      <>
-        <LoginModal isOpen={loginOpen} onClose={() => { setLoginOpen(false); setStep(1); }} />
-        <div className="min-h-screen gradient-hero flex flex-col items-center justify-center px-4">
-          <div className="text-center max-w-3xl">
-            <div className="mb-6 flex items-center justify-center gap-3">
-              <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
-                <Languages className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <span className="font-display font-bold text-2xl text-foreground">LinguaFlow</span>
+      <div className="min-h-screen gradient-hero flex flex-col items-center justify-center px-4">
+        <div className="text-center max-w-3xl">
+          <div className="mb-6 flex items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-glow">
+              <Languages className="w-6 h-6 text-primary-foreground" />
             </div>
-            <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
-              Maîtrise une nouvelle langue <span className="text-gradient">naturellement</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-10">
-              Conversations réalistes, exercices personnalisés et feedback instantané.
-              Ton tuteur IA s'adapte à ton rythme pour t'aider à progresser chaque jour.
-            </p>
+            <span className="font-display font-bold text-2xl text-foreground">LinguaFlow</span>
+          </div>
+          <h1 className="font-display text-4xl md:text-6xl font-bold mb-6">
+            Maîtrise une nouvelle langue <span className="text-gradient">naturellement</span>
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground mb-10">
+            Conversations réalistes, exercices personnalisés et feedback instantané.
+            Ton tuteur IA s'adapte à ton rythme pour t'aider à progresser chaque jour.
+          </p>
 
-            <div className="flex justify-center mt-6">
-  <Button
-    onClick={handleStart}
-    className="bg-blue-500 text-white px-8 py-4 rounded-2xl shadow-glow flex items-center gap-2"
-  >
-    Commencer gratuitement <ChevronRight className="w-5 h-5" />
-  </Button>
-</div>
+          <div className="flex justify-center mt-6">
+            <Button
+              onClick={handleStart}
+              className="bg-blue-500 text-white px-8 py-4 rounded-2xl shadow-glow flex items-center gap-2"
+            >
+              Commencer gratuitement <ChevronRight className="w-5 h-5" />
+            </Button>
+          </div>
 
-            <div className="mt-16 text-left w-full max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
-              <div className="flex flex-col items-start gap-2">
-                <h3 className="font-semibold text-lg text-foreground">✔️ Suivi personnalisé</h3>
-                <p className="text-muted-foreground text-sm">
-                  Ton apprentissage est adapté à ton niveau et à ton rythme grâce à notre IA.
-                </p>
-              </div>
-              <div className="flex flex-col items-start gap-2">
-                <h3 className="font-semibold text-lg text-foreground">✔️ Exercices interactifs</h3>
-                <p className="text-muted-foreground text-sm">
-                  Des exercices pratiques pour améliorer ton vocabulaire, ta grammaire et la compréhension orale.
-                </p>
-              </div>
-              <div className="flex flex-col items-start gap-2">
-                <h3 className="font-semibold text-lg text-foreground">✔️ Feedback instantané</h3>
-                <p className="text-muted-foreground text-sm">
-                  Notre tuteur IA fournit des corrections et conseils immédiats pour progresser efficacement.
-                </p>
-              </div>
+          <div className="mt-16 text-left w-full max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-start gap-2">
+              <h3 className="font-semibold text-lg text-foreground">✔️ Suivi personnalisé</h3>
+              <p className="text-muted-foreground text-sm">
+                Ton apprentissage est adapté à ton niveau et à ton rythme grâce à notre IA.
+              </p>
+            </div>
+            <div className="flex flex-col items-start gap-2">
+              <h3 className="font-semibold text-lg text-foreground">✔️ Exercices interactifs</h3>
+              <p className="text-muted-foreground text-sm">
+                Des exercices pratiques pour améliorer ton vocabulaire, ta grammaire et la compréhension orale.
+              </p>
+            </div>
+            <div className="flex flex-col items-start gap-2">
+              <h3 className="font-semibold text-lg text-foreground">✔️ Feedback instantané</h3>
+              <p className="text-muted-foreground text-sm">
+                Notre tuteur IA fournit des corrections et conseils immédiats pour progresser efficacement.
+              </p>
             </div>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -312,8 +233,8 @@ export default function Landing() {
           <div className="flex justify-between gap-4 mt-8">
             {step === 1 ? (
               <Button variant="outline" onClick={() => setStep(0)}>
-    Retour à l'accueil
-  </Button>
+                Retour à l'accueil
+              </Button>
             ) : step > 1 ? (
               <Button variant="outline" onClick={() => setStep((s) => s - 1)}>
                 Retour
